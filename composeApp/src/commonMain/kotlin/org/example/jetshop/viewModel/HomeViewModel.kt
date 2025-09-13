@@ -4,6 +4,7 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
+import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.example.jetshop.model.home.HomeResponse
 import org.example.jetshop.remote.ApiResponse
@@ -13,6 +14,10 @@ import org.example.jetshop.repo.home.HomeRepo
 
 
 class HomeViewModel(private val repo: HomeRepo) : ScreenModel {
+
+    // Fetch username from DataStore as Flow
+//    val userIsPrimeActive: StateFlow<String?> = dataStoreHelper.getValue(UserDataStore.isUserPrimeActive)
+//        .stateIn(viewModelScope, SharingStarted.Lazily, "")
     private val _homeState = MutableStateFlow<ApiResponse<HomeResponse>>(ApiResponse.Idle)
     val homeState = _homeState.asStateFlow()
 
