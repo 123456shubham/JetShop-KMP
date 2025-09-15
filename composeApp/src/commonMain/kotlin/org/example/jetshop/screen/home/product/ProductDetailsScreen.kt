@@ -1,5 +1,6 @@
 package org.example.jetshop.screen.home.product
 
+import androidx.compose.animation.core.animateFloatAsState
 import androidx.compose.animation.core.tween
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -89,14 +90,14 @@ import org.example.jetshop.ui.theme.appMainTypography
 import org.example.jetshop.utils.Constants.Companion.Ruppes
 import org.example.jetshop.viewModel.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
-import androidx.compose.animation.core.animateFloatAsState
-import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import jetshop.composeapp.generated.resources.right_arrow
 import org.example.jetshop.HideBottomBar
 import org.example.jetshop.repo.home.HomeRepo
-import org.example.jetshop.ui.theme.BlueDark
+import org.example.jetshop.screen.login.Login
 
 
 data class ProductDetailsScreen(val productId: String) : Screen, HideBottomBar {
@@ -283,7 +284,7 @@ fun SetDataUI(
     Box(
         modifier = Modifier
             .fillMaxSize()
-            .padding(bottom = 30.dp)
+            .background(white)
     ) {
         Column(
             modifier = Modifier
@@ -304,26 +305,27 @@ fun SetDataUI(
                 horizontalAlignment = Alignment.Start,
 
                 ) {
+                ProductDetails(productData )
 //                ProductDetails(productData, quantityState, wishlistViewModel)
                 Spacer(modifier = Modifier.height(20.dp))
 
                 // Rating & Review Section
-//                ReviewSection(
-//                    isLoggedIn,
-//                    productData = productData,
-//                    ratingReviewData = ratingReviewData,
-//                    onViewAllReviewsClick = {
-//                        showReviewSheet = true
-//                    },  // ✅ Open Review Listing Bottom Sheet
-//                    onWriteReviewClick = {
-//                        showWriteReviewSheet = true
-//                    } // ✅ Open Write Review Bottom Sheet
-//                )
+                ReviewSection(
+                    isLoggedIn,
+                    productData,
+                   ratingReviewData,
+                    onViewAllReviewsClick = {
+                        showReviewSheet = true
+                    },  // ✅ Open Review Listing Bottom Sheet
+                    onWriteReviewClick = {
+                        showWriteReviewSheet = true
+                    } // ✅ Open Write Review Bottom Sheet
+                )
 
                 Spacer(modifier = Modifier.height(100.dp))
 
                 // Related Products Section
-                // RelatedProductsSection()
+//                 RelatedProductsSection()
             }
         }
 
@@ -349,7 +351,7 @@ fun SetDataUI(
             onDismissRequest = { showReviewSheet = false },
             sheetState = reviewSheetState
         ) {
-//            ReviewListContent(ratingReviewData)
+            ReviewListContent(ratingReviewData)
         }
     }
 
@@ -359,23 +361,18 @@ fun SetDataUI(
             onDismissRequest = { showWriteReviewSheet = false },
             sheetState = writeReviewSheetState
         ) {
-//            WriteReviewContent(
-//                onSubmit = { rating, title, description ->
-//                    viewModel.AddUpdateReview(
-//                        productData.productId,
-//                        rating.toFloat(),
-//                        title,
-//                        description
-//                    )
-//                    showWriteReviewSheet = false
-//                }
-//            )
+            WriteReviewContent(
+                onSubmit = { rating, title, description ->
+//                    viewModel.AddUpdateReview(productData.productId, rating.toFloat(), title, description)
+                    showWriteReviewSheet = false
+                }
+            )
         }
     }
 }
 
 @Composable
-fun ReviewListContent(reviews: ReviewsData) {
+fun ReviewListContent(reviews: ReviewsData?) {
     Column(
         modifier = Modifier
             .fillMaxSize()
@@ -389,8 +386,8 @@ fun ReviewListContent(reviews: ReviewsData) {
         Spacer(modifier = Modifier.height(16.dp))
 
         LazyColumn(modifier = Modifier.fillMaxSize()) {
-            items(reviews.reviewList.size) { review ->
-                ReviewItem(reviews.reviewList[review])
+            items(reviews?.reviewList?.size!!) { review ->
+                ReviewItem(reviews?.reviewList[review]!!)
             }
         }
     }
@@ -596,25 +593,27 @@ fun WriteReviewContent(onSubmit: (Int, String, String) -> Unit) {
 fun ProductHeader(
     productData: Product?,
 ) {
+
+    val navigator= LocalNavigator.currentOrThrow
     //curve for header card
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .background(
-                Color(0xfff2f3f2),
+            .background(white,
                 //  shape = RoundedCornerShape(bottomStartPercent = 17, bottomEndPercent = 17)
             )
     ) {
-        Spacer(modifier = Modifier.height(26.dp))
+        Spacer(modifier = Modifier.height(5.dp))
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(start = 15.dp, end = 15.dp, top = 15.dp),
+                .padding(start = 5.dp, end = 10.dp),
             horizontalArrangement = Arrangement.SpaceBetween,
             verticalAlignment = Alignment.CenterVertically
         ) {
             IconButton(
                 onClick = {
+                    navigator.pop()
 //                    navController.popBackStack()
                 },
                 modifier = Modifier
@@ -652,15 +651,16 @@ fun ProductHeader(
         Row(
             modifier = Modifier
                 .fillMaxWidth()
-                .padding(horizontal = 16.dp, vertical = 16.dp),
+                .background(white)
+                .padding(horizontal = 10.dp, vertical = 10.dp),
             horizontalArrangement = Arrangement.Center,
             verticalAlignment = Alignment.Top
         ) {
             AsyncImage(
                 model = productData?.product_image_url,
                 contentDescription = productData?.product_name,
-                modifier = Modifier.size(400.dp, 250.dp),
-                contentScale = ContentScale.Fit
+                modifier = Modifier.fillMaxWidth().height(300.dp),
+                contentScale = ContentScale.Crop
             )
         }
     }
@@ -668,8 +668,8 @@ fun ProductHeader(
 
 @Composable
 fun ProductDetails(
-    productData: Product,
-    quantityState: MutableState<Int>,
+    productData: Product?,
+//    quantityState: MutableState<Int>,
 //    wishlistViewModel: WishlistViewModel,
 ) {
     var isInWishlist by remember { mutableStateOf(false) }
@@ -684,13 +684,13 @@ fun ProductDetails(
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp)
+            .padding(start = 10.dp, end = 10.dp)
     ) {
         Spacer(modifier = Modifier.height(20.dp))
 
         Row(modifier = Modifier.fillMaxWidth(), verticalAlignment = Alignment.CenterVertically) {
             Text(
-                text = productData.product_name.toString(),
+                text = productData?.product_name.toString(),
                 style = ProductTypography().prodTitleMedium,
                 modifier = Modifier.weight(1f)
             )
@@ -705,7 +705,7 @@ fun ProductDetails(
                         isInWishlist = !isInWishlist // Toggle UI state
                     }) {
                     Image(
-                        modifier = Modifier.size(35.dp),
+                        modifier = Modifier.size(24.dp),
                         painter =painterResource( if (isInWishlist) Res.drawable.love else Res.drawable.heart),
                         contentDescription = "Favorite",
 //                        tint = if (isInWishlist) Color.Red else Color.Gray
@@ -721,27 +721,34 @@ fun ProductDetails(
     Row(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp), horizontalArrangement = Arrangement.SpaceBetween
+            .padding(start = 10.dp, end = 10.dp), horizontalArrangement = Arrangement.SpaceBetween
     ) {
         Text(
-            text = Ruppes + productData.product_discount_price,
+            text = Ruppes + productData?.product_discount_price,
             style = ProductTypography().prodPriceBold,
         )
         Text(
-            text = Ruppes + productData.product_discount_price,
+            text = Ruppes + productData?.product_discount_price,
             style = ProductTypography().prodDiscountPrice,
         )
     }
-    val loremText =
+
+    Text(
+        text = productData?.product_description.toString(),
+        style = ProductTypography().prodDescription,
+        overflow = TextOverflow.Ellipsis,
+        modifier = Modifier.padding(10.dp)
+    )
+//    val loremText =
 //        LoremIpsum(50).values // Generates 5 paragraphs of Lorem Ipsum text
-    productData.product_description?.let {
-        Text(
-            text = it,
-            style = ProductTypography().prodDescription,
-            overflow = TextOverflow.Ellipsis,
-            modifier = Modifier.padding(16.dp)
-        )
-    }
+//    productData?.product_description?.let {
+//        Text(
+//            text = it.toString(),
+//            style = ProductTypography().prodDescription,
+//            overflow = TextOverflow.Ellipsis,
+//            modifier = Modifier.padding(16.dp)
+//        )
+//    }
 
     /*Row(modifier = Modifier.fillMaxWidth(), horizontalArrangement = Arrangement.SpaceBetween) {
         QuantitySelector(quantityState.value, onQuantityChanged = { quantityState.value = it })
@@ -764,17 +771,18 @@ fun ProductDetails(
 @Composable
 fun ReviewSection(
     isLoggedIn: MutableState<Boolean>,
-    productData: Product,
-    ratingReviewData: ReviewsData,
+    productData: Product?,
+    ratingReviewData: ReviewsData?,
     onWriteReviewClick: () -> Unit,
     onViewAllReviewsClick: () -> Unit,
 ) {
-//    val totalReviews: Float = ratingReviewData.totalReviewCount?.toFloat()?.coerceAtLeast(1f) // Avoid division by zero
+    val totalReviews: Float =
+        ratingReviewData?.totalReviewCount?.toFloat()?.coerceAtLeast(1f)!! // Avoid division by zero
 
     Column(
         modifier = Modifier
             .fillMaxWidth()
-            .padding(start = 16.dp, end = 16.dp)
+            .padding(start = 10.dp, end = 10.dp)
     ) {
         Row(
             modifier = Modifier
@@ -789,7 +797,8 @@ fun ReviewSection(
             Icon(
                 painter = painterResource(Res.drawable.right_arrow),
                 contentDescription = null,
-                tint = Color.Blue
+                tint = Color.Blue,
+                modifier = Modifier.size(18.dp)
             )
         }
         Spacer(modifier = Modifier.height(16.dp))
@@ -801,46 +810,46 @@ fun ReviewSection(
         ) {
             Column(horizontalAlignment = Alignment.CenterHorizontally) {
                 Text(
-                    text = productData.product_rating.toString(),
+                    text = productData?.product_rating.toString(),
                     fontSize = 50.sp,
                     fontFamily = Montserrat,
                     fontWeight = FontWeight.Bold
                 )
                 Text(
-                    text = "${ratingReviewData.totalReviewCount} reviews",
+                    text = "${ratingReviewData?.totalReviewCount} reviews",
                     style = appMainTypography().subHeader,
                 )
             }
-//            Column {
-//                // Animated progress values
-//                val fiveStarProgress by animateFloatAsState(
-//                    targetValue = ratingReviewData.fiveStarReviewCount?.div(totalReviews) ?: 1f,
-//                    animationSpec = tween(1000)
-//                )
-//                val fourStarProgress by animateFloatAsState(
-//                    targetValue = ratingReviewData.fourStarReviewCount?.div(totalReviews) ?: 1f,
-//                    animationSpec = tween(1000)
-//                )
-//                val threeStarProgress by animateFloatAsState(
-//                    targetValue = ratingReviewData.threeStarReviewCount?.div(totalReviews) ?: 1f,
-//                    animationSpec = tween(1000)
-//                )
-//                val twoStarProgress by animateFloatAsState(
-//                    targetValue = ratingReviewData.twoStarReviewCount?.div(totalReviews) ?: 1f,
-//                    animationSpec = tween(1000)
-//                )
-//                val oneStarProgress by animateFloatAsState(
-//                    targetValue = ratingReviewData.oneStarReviewCount?.div(totalReviews) ?: 1f,
-//                    animationSpec = tween(1000)
-//                )
-//
-//                // Progress bars
-//                RatingProgressBar(stars = 5, progress = fiveStarProgress)
-//                RatingProgressBar(stars = 4, progress = fourStarProgress)
-//                RatingProgressBar(stars = 3, progress = threeStarProgress)
-//                RatingProgressBar(stars = 2, progress = twoStarProgress)
-//                RatingProgressBar(stars = 1, progress = oneStarProgress)
-//            }
+            Column {
+                // Animated progress values
+                val fiveStarProgress by animateFloatAsState(
+                    targetValue = ratingReviewData?.fiveStarReviewCount?.div(totalReviews) ?: 1f,
+                    animationSpec = tween(1000)
+                )
+                val fourStarProgress by animateFloatAsState(
+                    targetValue = ratingReviewData?.fourStarReviewCount?.div(totalReviews) ?: 1f,
+                    animationSpec = tween(1000)
+                )
+                val threeStarProgress by animateFloatAsState(
+                    targetValue = ratingReviewData?.threeStarReviewCount?.div(totalReviews) ?: 1f,
+                    animationSpec = tween(1000)
+                )
+                val twoStarProgress by animateFloatAsState(
+                    targetValue = ratingReviewData?.twoStarReviewCount?.div(totalReviews) ?: 1f,
+                    animationSpec = tween(1000)
+                )
+                val oneStarProgress by animateFloatAsState(
+                    targetValue = ratingReviewData?.oneStarReviewCount?.div(totalReviews) ?: 1f,
+                    animationSpec = tween(1000)
+                )
+
+                // Progress bars
+                RatingProgressBar(stars = 5, progress = fiveStarProgress)
+                RatingProgressBar(stars = 4, progress = fourStarProgress)
+                RatingProgressBar(stars = 3, progress = threeStarProgress)
+                RatingProgressBar(stars = 2, progress = twoStarProgress)
+                RatingProgressBar(stars = 1, progress = oneStarProgress)
+            }
         }
 
         Spacer(modifier = Modifier.height(16.dp))
@@ -904,6 +913,7 @@ fun CheckoutButton(
 //    GoToCart: () -> Unit,
 ) {
     val showLoginDialog = remember { mutableStateOf(false) }
+    val nav = LocalNavigator.currentOrThrow
 
 // Show the login prompt when needed
     LoginPromptDialog(
@@ -912,6 +922,8 @@ fun CheckoutButton(
         onLoginClick = {
             showLoginDialog.value = false
 //            navController.navigate(Screen.Login.route)
+            nav.push(Login)
+
         }
     )
     Box(

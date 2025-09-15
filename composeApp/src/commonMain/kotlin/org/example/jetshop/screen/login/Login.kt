@@ -25,6 +25,7 @@ import cafe.adriel.voyager.navigator.LocalNavigator
 import jetshop.composeapp.generated.resources.Res
 import jetshop.composeapp.generated.resources.email
 import jetshop.composeapp.generated.resources.logo
+import org.example.jetshop.HideBottomBar
 import org.example.jetshop.components.AppButton
 import org.example.jetshop.components.BlurView
 import org.example.jetshop.components.CircularImage
@@ -38,7 +39,7 @@ import org.example.jetshop.screen.register.Register
 import org.example.jetshop.ui.theme.BluePrimary
 
 
-object  Login : Screen {
+object  Login : Screen , HideBottomBar{
     @Composable
     override fun Content() {
         LoginScreen()

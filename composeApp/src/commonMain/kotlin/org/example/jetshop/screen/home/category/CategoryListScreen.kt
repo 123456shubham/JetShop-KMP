@@ -29,13 +29,14 @@ import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
+import org.example.jetshop.HideBottomBar
 import org.example.jetshop.components.Spacer_8dp
 import org.example.jetshop.components.ToolbarWithBackButtonAndTitle
 import org.example.jetshop.ui.theme.white
 
 
 data class CategoryListVoyagerScreen(val categoryName: String
-) : Screen {
+) : Screen , HideBottomBar {
 
     @Composable
     override fun Content() {
