@@ -13,9 +13,7 @@ import androidx.compose.runtime.Composable
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.unit.dp
-import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
-import cafe.adriel.voyager.navigator.Navigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import org.example.jetshop.components.Spacer_8dp
 import org.example.jetshop.model.home.Category
@@ -114,7 +112,8 @@ fun CategoriesListing(categories: List<Category>?) {
             contentType = { index -> categories!![index].name }
         ) { index ->
             CommonCircleItem(item = ItemType.Category(categories!![index])) {
-                navigator.push(CategoryListVoyagerScreen(categories[index].name.toString()))
+//                navigator.push(CategoryBrandScreen(true))
+                navigator.push(CategoryListVoyagerScreen(categories[index].name.toString(),categories[index].id.toString()))
             }
         }
     }

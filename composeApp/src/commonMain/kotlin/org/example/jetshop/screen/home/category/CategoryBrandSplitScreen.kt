@@ -97,13 +97,14 @@ import androidx.compose.ui.unit.LayoutDirection
 import androidx.navigation.NavController
 import cafe.adriel.voyager.core.screen.Screen
 import coil3.compose.AsyncImage
+import org.example.jetshop.HideBottomBar
 import org.example.jetshop.components.LoginPromptDialog
 import org.example.jetshop.components.Montserrat
 import org.example.jetshop.components.Spacer_4dp
 import org.example.jetshop.components.Spacer_8dp
 import org.example.jetshop.components.ToolbarWithBackButtonAndTitle
 
-data class CategoryBrandScreen( val isCategoryScreen: Boolean): Screen{
+data class CategoryBrandScreen( val isCategoryScreen: Boolean): Screen, HideBottomBar{
     @Composable
     override fun Content(){
         CategoryBrandSplitScreen(isCategoryScreen)

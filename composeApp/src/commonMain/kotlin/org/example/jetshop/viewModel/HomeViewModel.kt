@@ -9,6 +9,7 @@ import kotlinx.coroutines.flow.asStateFlow
 import org.example.jetshop.model.home.HomeResponse
 import org.example.jetshop.remote.ApiResponse
 import kotlinx.coroutines.launch
+import org.example.jetshop.model.category.CategoryDetailsResponse
 import org.example.jetshop.model.productDetails.ProductDetailsResponse
 import org.example.jetshop.repo.home.HomeRepo
 
@@ -49,6 +50,23 @@ class HomeViewModel(private val repo: HomeRepo) : ScreenModel {
 
         }
 
+    }
+
+    private val _categoryDetails=MutableStateFlow<ApiResponse<CategoryDetailsResponse>>(ApiResponse.Idle)
+    val categoryDetails=_categoryDetails.asStateFlow()
+
+
+    fun fetchCategoryDetails(categoryId:String){
+        CoroutineScope(Dispatchers.Default).launch {
+            _categoryDetails.value=ApiResponse.Loading
+            try {
+                val response=repo.categoryDetails(categoryId)
+                _categoryDetails.value=ApiResponse.Success(response)
+            }catch (e:Exception){
+                _categoryDetails.value=ApiResponse.Error(e.message?:"Unknown error")
+            }
+
+        }
     }
 }
 

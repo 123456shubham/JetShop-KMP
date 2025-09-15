@@ -1,5 +1,6 @@
 package org.example.jetshop.screen
 
+import androidx.compose.foundation.background
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Row
@@ -17,15 +18,17 @@ import androidx.compose.ui.Modifier
 import androidx.compose.ui.focus.FocusRequester
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
+import org.example.jetshop.HideBottomBar
 import org.example.jetshop.components.OTPInputField
+import org.example.jetshop.ui.theme.white
 
-object OTP : Screen {
+object OTP : Screen, HideBottomBar {
     @Composable
     override fun Content() {
         var otp by rememberSaveable { mutableStateOf("") }
 
         Box(
-            modifier = Modifier.fillMaxSize(),
+            modifier = Modifier.fillMaxSize().background(white),
             contentAlignment = Alignment.Center
         ) {
             OTPInputRow(
@@ -49,7 +52,7 @@ fun OTPInputRow(
 
     Row(
         horizontalArrangement = Arrangement.spacedBy(12.dp),
-        modifier = Modifier.fillMaxWidth(),
+        modifier = Modifier.fillMaxSize(),
     ) {
         otpValues.forEachIndexed { index, value ->
             OTPInputField(

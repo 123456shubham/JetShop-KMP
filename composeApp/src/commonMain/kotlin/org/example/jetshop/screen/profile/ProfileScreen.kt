@@ -6,9 +6,10 @@ import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.runtime.Composable
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
+import org.example.jetshop.HideBottomBar
 import org.example.jetshop.ui.theme.white
 
-object ProfileScreen : Screen {
+object ProfileScreen : Screen , HideBottomBar{
     @Composable
     override fun Content() {
         Box(modifier = Modifier.fillMaxSize().background(white)){

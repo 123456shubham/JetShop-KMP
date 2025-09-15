@@ -31,12 +31,13 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.screen.Screen
 import jetshop.composeapp.generated.resources.Res
 import jetshop.composeapp.generated.resources.forgot_bg
+import org.example.jetshop.HideBottomBar
 import org.example.jetshop.components.AppButton
 import org.example.jetshop.components.Montserrat
 import org.example.jetshop.ui.theme.white
 import org.jetbrains.compose.resources.painterResource
 
-object ForgetPassword : Screen {
+object ForgetPassword : Screen, HideBottomBar {
     @Composable
     override fun Content() {
         ForgetPasswordScreen()

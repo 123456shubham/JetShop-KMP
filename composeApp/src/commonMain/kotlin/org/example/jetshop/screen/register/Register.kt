@@ -40,6 +40,7 @@ import jetshop.composeapp.generated.resources.telephone
 import jetshop.composeapp.generated.resources.upload
 import jetshop.composeapp.generated.resources.user
 import kotlinx.coroutines.launch
+import org.example.jetshop.HideBottomBar
 import org.example.jetshop.components.AppButton
 import org.example.jetshop.components.CircularImage
 import org.example.jetshop.components.CustomOutlinedTextField
@@ -58,7 +59,7 @@ import org.example.jetshop.utils.CommonFunction.RegisterCheckbox
 import org.example.jetshop.viewModel.AuthViewModel
 
 
-object Register : Screen{
+object Register : Screen, HideBottomBar{
     @Composable
     override fun Content() {
 

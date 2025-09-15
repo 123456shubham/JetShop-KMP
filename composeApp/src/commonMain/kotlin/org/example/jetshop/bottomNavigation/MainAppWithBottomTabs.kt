@@ -11,16 +11,11 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Modifier
 import cafe.adriel.voyager.core.screen.Screen
-import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.tab.CurrentTab
 import cafe.adriel.voyager.navigator.tab.TabNavigator
-import org.example.jetshop.HideBottomBar
-import org.example.jetshop.tabs.CartTabs
+
 import org.example.jetshop.tabs.HomeTabs
-import org.example.jetshop.tabs.ProfileTabs
-import org.example.jetshop.tabs.WhichlistTabs
-import org.example.jetshop.screen.home.category.CategoryListVoyagerScreen
-import org.example.jetshop.screen.home.product.ProductDetailsScreen
+
 
 object BottomTabs : Screen {
     @Composable

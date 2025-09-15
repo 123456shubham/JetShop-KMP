@@ -1,6 +1,8 @@
 package org.example.jetshop.screen.home.category
 
+import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
+import androidx.compose.foundation.border
 import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Box
@@ -9,252 +11,280 @@ import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
+import androidx.compose.foundation.layout.height
 import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.lazy.grid.GridCells
 import androidx.compose.foundation.lazy.grid.LazyVerticalGrid
 import androidx.compose.foundation.shape.RoundedCornerShape
+import androidx.compose.material3.Button
+import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
+import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.IconButton
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
+import androidx.compose.runtime.LaunchedEffect
+import androidx.compose.runtime.collectAsState
+import androidx.compose.runtime.getValue
+import androidx.compose.runtime.mutableStateOf
+import androidx.compose.runtime.remember
+import androidx.compose.ui.Alignment
+import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
 import androidx.compose.ui.draw.clip
 import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
-import androidx.navigation.Navigator
+import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
 import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
+import jetshop.composeapp.generated.resources.Res
+import jetshop.composeapp.generated.resources.add_to_cart
+import jetshop.composeapp.generated.resources.minus
+import jetshop.composeapp.generated.resources.plus
 import org.example.jetshop.HideBottomBar
+import org.example.jetshop.components.CenteredCircularProgressIndicator
+import org.example.jetshop.components.LoginPromptDialog
+import org.example.jetshop.components.Spacer_4dp
 import org.example.jetshop.components.Spacer_8dp
 import org.example.jetshop.components.ToolbarWithBackButtonAndTitle
+import org.example.jetshop.model.category.CategoryDetailsResponse
+import org.example.jetshop.model.category.Product
+import org.example.jetshop.remote.ApiResponse
+import org.example.jetshop.repo.home.HomeRepo
+import org.example.jetshop.screen.home.product.ProductDetailsScreen
+import org.example.jetshop.screen.login.Login
+import org.example.jetshop.ui.theme.ProductTypography
 import org.example.jetshop.ui.theme.white
+import org.example.jetshop.viewModel.HomeViewModel
+import org.jetbrains.compose.resources.painterResource
 
-
-data class CategoryListVoyagerScreen(val categoryName: String
-) : Screen , HideBottomBar {
-
+data class CategoryListVoyagerScreen(val categoryName: String,val categoryId: String) : Screen, HideBottomBar {
     @Composable
     override fun Content() {
-        CategoryListScreen(categoryName = categoryName)
+        val viewModel: HomeViewModel = rememberScreenModel { HomeViewModel(HomeRepo()) }
+        CategoryListScreen(categoryName = categoryName,  categoryId,viewModel = viewModel)
     }
 }
 
 @Composable
-fun CategoryListScreen(categoryName: String) {
+fun CategoryListScreen(categoryName: String,categoryId: String, viewModel: HomeViewModel) {
+    LaunchedEffect(Unit) {
+        viewModel.fetchCategoryDetails(categoryId)
+    }
 
-    val navigator= LocalNavigator.currentOrThrow
-    Box(modifier = Modifier.fillMaxSize().background(white)){
+    val categoryState by viewModel.categoryDetails.collectAsState()
+    val navigator = LocalNavigator.currentOrThrow
+    val showLoginDialog = remember { mutableStateOf(false) }
 
-        Scaffold(topBar={
-            ToolbarWithBackButtonAndTitle(title = "${categoryName}", onBackClick = {navigator?.pop()})
-        }) { paddingValues ->
+    Box(modifier = Modifier.fillMaxSize().background(white)) {
+        Scaffold(
+            topBar = {
+                ToolbarWithBackButtonAndTitle(
+                    title = categoryName,
+                    onBackClick = { navigator.pop() }
+                )
+            }
+        ) { paddingValues ->
 
-            Box(modifier = Modifier.fillMaxWidth()) {
-                LazyVerticalGrid(
-                    columns = GridCells.Fixed(2),
-                    contentPadding = PaddingValues(8.dp),
-                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-                    verticalArrangement = Arrangement.spacedBy(8.dp),
-                    modifier = Modifier
-                        .fillMaxSize()
-                        .padding(paddingValues) // Fix: Apply padding only here
-                ) {
+            LoginPromptDialog(
+                showDialog = showLoginDialog.value,
+                onDismiss = { showLoginDialog.value = false },
+                onLoginClick = {
+                    showLoginDialog.value = false
+                    navigator.push(Login)
+                }
+            )
 
-                    item {
+            when (categoryState) {
+                is ApiResponse.Idle -> {}
+                is ApiResponse.Loading -> CenteredCircularProgressIndicator()
+                is ApiResponse.Success -> {
+                    val products = (categoryState as ApiResponse.Success<CategoryDetailsResponse>).data.products
 
-
-                        Card(
-                            modifier = Modifier
-                                .fillMaxWidth()
-                                .padding(8.dp),
-                        ) {
-                            Row(
-                                modifier = Modifier.padding(8.dp)
-                            ) {
-//                            AsyncImage(
-//                                model = product.productImageUrl,
-//                                contentDescription = product.productName,
-//                                modifier = Modifier
-//                                    .size(80.dp)
-//                                    .clip(RoundedCornerShape(8.dp))
-//                            )
-
-                                Spacer_8dp()
-
-                                Column(modifier = Modifier.weight(1f)) {
-                                    Text(
-                                        "Product Name",
-                                        fontWeight = FontWeight.Bold,
-                                        fontSize = 16.sp
-                                    )
-                                    Text("₹ 12000", color = Color.Red, fontSize = 14.sp)
-                                    Text("Stock: 3", fontSize = 12.sp, color = Color.Gray)
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(5.dp),
+                        horizontalArrangement = Arrangement.spacedBy(5.dp),
+                        verticalArrangement = Arrangement.spacedBy(5.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .background(white)
+                            .padding(paddingValues)
+                    ) {
+                        items(products?.size!!) { index ->
+                            val product = products[index]
+                            ProductCardPage(
+                                product = product,
+                                onClick = {
+                                    navigator.push(ProductDetailsScreen(product?.product_id.toString()))
                                 }
-                            }
+                            )
                         }
-
                     }
                 }
-
+                is ApiResponse.Error -> {
+                    Text(
+                        text = "Error: ${(categoryState as ApiResponse.Error).message}",
+                        color = Color.Red,
+                        modifier = Modifier.padding(16.dp)
+                    )
+                    print("Error...${(categoryState as ApiResponse.Error).message}")
+                }
             }
         }
-
     }
 }
 
 
 
 
+@Composable
+fun ProductCardPage(
+    product: Product?,
+    onClick: () -> Unit,
+) {
+    Card(
+        modifier = Modifier
+            .fillMaxWidth()
+            .clickable { onClick() }
+            .padding(5.dp),
+        shape = RoundedCornerShape(8.dp),
+        elevation = CardDefaults.cardElevation(defaultElevation = 5.dp),
+        colors = CardDefaults.cardColors(white)
+    ) {
+        Column (
+            modifier = Modifier.padding(8.dp)
+        ) {
+            AsyncImage(
+                model = product?.product_image_url,
+                contentDescription = product?.product_name,
+                contentScale = ContentScale.Fit,
+                modifier = Modifier
+                    .size(80.dp)
+                    .align(Alignment.CenterHorizontally)
+                    .clip(RoundedCornerShape(8.dp))
+            )
 
-//@Composable
-//fun ProductListScreen(
-//
-//) {
-//
-//
-////    LoginPromptDialog(
-////        showDialog = showLoginDialog.value,
-////        onDismiss = { showLoginDialog.value = false },
-////        onLoginClick = {
-////            showLoginDialog.value = false
-////            navController.navigate(Screen.Login.route)
-////        }
-////    )
-//
-//    Scaffold(topBar = {
-//        ToolbarWithBackButtonAndTitle(title = "Products", onBackClick = {navController.popBackStack()})
-//    }) { paddingValues ->
-//        Box(modifier = Modifier.fillMaxSize()) { // Fix: Remove padding here
-//            if (productData.loadState.refresh is LoadState.Loading) {
-//                CenteredCircularProgressIndicator()
-//            } else if (productData.loadState.refresh is LoadState.Error) {
-//                val error = (productData.loadState.refresh as LoadState.Error).error
-//                Box(
-//                    modifier = Modifier.fillMaxSize(),
-//                    contentAlignment = Alignment.Center
-//                ) {
-//                    Column(
-//                        horizontalAlignment = Alignment.CenterHorizontally
-//                    ) {
-//                        Text(text = "Error: ${error.localizedMessage}", color = Color.Red, fontFamily = Montserrat)
-//                        Spacer_8dp()
-//                        Button(onClick = { productData.refresh() }) {
-//                            Text("Retry",fontFamily = Montserrat)
-//                        }
-//                    }
-//                }
-//            } else {
-//                LazyVerticalGrid(
-//                    columns = GridCells.Fixed(2),
-//                    contentPadding = PaddingValues(8.dp),
-//                    horizontalArrangement = Arrangement.spacedBy(8.dp),
-//                    verticalArrangement = Arrangement.spacedBy(8.dp),
-//                    modifier = Modifier
-//                        .fillMaxSize()
-//                        .padding(paddingValues) // Fix: Apply padding only here
-//                ) {
-//                    items(productData.itemCount) { index ->
-//                        val product = productData[index]
-//                        product?.let {
-//                            var isInWishlist by remember { mutableStateOf(false) }
-//
-//                            LaunchedEffect(product) {
-//                                wishlistViewModel.isProductInWishlist(product.productId) {
-//                                    isInWishlist = it
-//                                }
-//                            }
-//                            val wishlistProduct = product.toWishlistProduct()
-//
-//                            ProductCard(
-//                                viewModel = viewModel,
-//                                product = it,
-//                                onAddToCart = { productId ->
-//                                    if (isLoggedIn.value) {
-//                                        viewModel.addToCart(productId, "1")
-//                                    } else {
-//                                        showLoginDialog.value = true
-//                                    }
-//                                },
-//                                onViewProduct = { selectedProduct ->
-//                                    navController.navigate("${Screen.ProductDetails.route}/${selectedProduct.productId}")
-//                                },
-//                                onWishlistToggle = {
-//                                    if (isInWishlist) {
-//                                        wishlistViewModel.removeFromWishlist(wishlistProduct)
-//                                    } else {
-//                                        wishlistViewModel.addToWishlist(wishlistProduct)
-//                                    }
-//                                    isInWishlist = !isInWishlist
-//                                },
-//                                isInWishlist = isInWishlist,
-//                                onRemoveFromCart = { productId ->
-//                                    viewModel.removeFromCart(productId)
-//                                }
+            Spacer_8dp()
+            Text(product?.product_name.toString(), maxLines = 1, fontWeight = FontWeight.Bold, fontSize = 16.sp)
+
+
+            Row(modifier = Modifier.fillMaxWidth()) {
+                Text("₹ "+product?.product_discount_price.toString(),
+                    fontWeight = FontWeight.Bold,
+                    style = ProductTypography().prodPriceBold,
+
+                    fontSize = 12.sp, modifier = Modifier.weight(1f))
+//                Spacer_4dp()
+                Text("₹ ${product?.product_price}",
+                    color = Color.Red,
+                    fontSize = 12.sp,
+                    style = ProductTypography().prodDiscountPrice,
+                    modifier = Modifier.weight(1f))
+            }
+
+            Spacer_8dp()
+
+            val productQuantity=0
+            // Quantity Selector UI
+            if ( productQuantity > 0) {
+                Row(
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(35.dp)
+                        .border(1.dp, Color(0xFF00C853), RoundedCornerShape(6.dp)),
+                    horizontalArrangement = Arrangement.SpaceBetween,
+                    verticalAlignment = CenterVertically
+                ) {
+                    // Decrease (-) Button
+                    IconButton(onClick = {
+//                            viewModel.updateCartQuantity(product.productId, productQuantity - 1)
+//                            onRemoveFromCart(product.productId)
+                    }) {
+                        Image(
+                            painter = painterResource(Res.drawable.minus),
+                            contentDescription = "minus",
+                            modifier = Modifier.size(16.dp)
+//                                tint = if (isInWishlist) Color.Red else Color.Gray
+                        )
+
+                    }
+
+                    // Quantity Text
+                    Text(
+                        text = productQuantity.toString(),
+                        style = ProductTypography().productQuantity,
+                    )
+
+                    // Increase (+) Button
+                    IconButton(onClick = {
+//                            viewModel.updateCartQuantity(product.productId, productQuantity + 1)
+//                            onAddToCart(product.productId)
+                    }) {
+
+                        Image(
+                            painter = painterResource(Res.drawable.plus),
+                            contentDescription = "add",
+                            modifier = Modifier.size(16.dp)
+
+//                                tint = if (isInWishlist) Color.Red else Color.Gray
+                        )
+//                            Icon(
+//                                imageVector = Icons.Default.Add,
+//                                contentDescription = "Increase",
+//                                tint = Color(0xFF00C853)
 //                            )
-//                        }
-//                    }
-//
-//                    // Bottom loader when paginating
-//                    if (productData.loadState.append is LoadState.Loading) {
-//                        item(span = { GridItemSpan(2) }) {
-//                            CenteredCircularProgressIndicator()
-//                        }
-//                    }
-//
-//                    // Pagination error handling
-//                    if (productData.loadState.append is LoadState.Error) {
-//                        item(span = { GridItemSpan(2) }) {
-//                            val error = (productData.loadState.append as LoadState.Error).error
-//                            Box(
-//                                modifier = Modifier
-//                                    .fillMaxWidth()
-//                                    .padding(16.dp),
-//                                contentAlignment = Alignment.Center
-//                            ) {
-//                                Column(
-//                                    horizontalAlignment = Alignment.CenterHorizontally
-//                                ) {
-//                                    Text(
-//                                        text = "Error: ${error.localizedMessage}",
-//                                        color = Color.Red,fontFamily = Montserrat
-//                                    )
-//                                    Spacer_8dp()
-//                                    Button(onClick = { productData.retry() }) {
-//                                        Text("Retry",fontFamily = Montserrat)
-//                                    }
-//                                }
-//                            }
-//                        }
-//                    }
-//                }
-//            }
-//        }
-//    }
-//
-//}
-//
+                    }
+                }
+            } else {
+                // Add to Cart Button
+                Button(
+                    onClick = {
+//                            viewModel.updateCartQuantity(product.productId, productQuantity + 1)
+//                            onAddToCart(product.productId)
+                    },
+                    shape = RoundedCornerShape(6.dp),
+                    modifier = Modifier
+                        .fillMaxWidth()
+                        .height(36.dp),
+                    colors = ButtonDefaults.buttonColors(
+                        containerColor = Color(0xFF00C853), // Green
+                        contentColor = Color.White
+                    )
+                ) {
+                    Image(
+                        painter = painterResource(Res.drawable.add_to_cart),
+                        contentDescription = "Add to Cart",
+                        modifier = Modifier.size(22.dp)
+                    )
+                    Spacer_4dp()
+                    //Text(text = "Add to Cart", fontSize = 12.sp, fontWeight = FontWeight.Bold)
+                }
+            }
+        }
+    }
+}
 //@Composable
-//fun ProductCardPage(
-//    product: ProductData,
-//    onClick: () -> Unit,
-//) {
+//fun ProductCardPage(product: Product?, onClick: () -> Unit) {
 //    Card(
 //        modifier = Modifier
 //            .fillMaxWidth()
+//            .padding(8.dp)
 //            .clickable { onClick() }
-//            .padding(8.dp),
 //    ) {
-//        Row(
+//       Column(
 //            modifier = Modifier.padding(8.dp)
 //        ) {
 //            AsyncImage(
-//                model = product.productImageUrl,
-//                contentDescription = product.productName,
+//                model = product?.product_image_url,
+//                contentDescription = product?.product_name,
 //                modifier = Modifier
 //                    .size(80.dp)
 //                    .clip(RoundedCornerShape(8.dp))
@@ -262,10 +292,22 @@ fun CategoryListScreen(categoryName: String) {
 //
 //            Spacer_8dp()
 //
-//            Column(modifier = Modifier.weight(1f)) {
-//                Text(product.productName, fontWeight = FontWeight.Bold, fontSize = 16.sp)
-//                Text("₹${product.productDiscountPrice}", color = Color.Red, fontSize = 14.sp)
-//                Text("Stock: ${product.productStockQuantity}", fontSize = 12.sp, color = Color.Gray)
+//            Row(modifier = Modifier) {
+//                Text(
+//                    text = product?.product_name.toString(),
+//                    fontWeight = FontWeight.Bold,
+//                    fontSize = 16.sp
+//                )
+//                Text(
+//                    text = "₹${product?.product_discount_price}",
+//                    color = Color.Red,
+//                    fontSize = 14.sp
+//                )
+//                Text(
+//                    text = "Stock: ${product?.product_stock_quantity}",
+//                    fontSize = 12.sp,
+//                    color = Color.Gray
+//                )
 //            }
 //        }
 //    }

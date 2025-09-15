@@ -660,7 +660,7 @@ fun ProductHeader(
                 model = productData?.product_image_url,
                 contentDescription = productData?.product_name,
                 modifier = Modifier.fillMaxWidth().height(300.dp),
-                contentScale = ContentScale.Crop
+                contentScale = ContentScale.FillWidth
             )
         }
     }

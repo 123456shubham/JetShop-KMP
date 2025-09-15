@@ -3,6 +3,7 @@ package org.example.jetshop.repo.home
 import androidx.compose.ui.graphics.vector.addPathNodes
 import io.ktor.client.HttpClient
 import io.ktor.client.call.body
+import io.ktor.client.request.accept
 import io.ktor.client.request.forms.FormDataContent
 import io.ktor.client.request.get
 import io.ktor.client.request.post
@@ -10,6 +11,7 @@ import io.ktor.client.request.setBody
 import io.ktor.http.ContentType
 import io.ktor.http.Parameters
 import io.ktor.http.contentType
+import org.example.jetshop.model.category.CategoryDetailsResponse
 import org.example.jetshop.model.home.HomeResponse
 import org.example.jetshop.model.productDetails.ProductDetailsResponse
 import org.example.jetshop.remote.BASE_URL
@@ -28,5 +30,18 @@ class HomeRepo {
                 append("product_id", productId)
             }))
         }.body()
+    }
+
+    suspend fun categoryDetails(categoryId: String) : CategoryDetailsResponse{
+        return client.get (BASE_URL + "list_products_by_category.php") {
+//            contentType(ContentType.Application.FormUrlEncoded)
+            url {
+                parameters.append("category_id", categoryId) // query param
+            }
+            accept(ContentType.Application.Json)
+
+
+        }.body()
+
     }
 }
