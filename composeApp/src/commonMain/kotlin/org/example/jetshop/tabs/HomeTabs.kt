@@ -10,6 +10,8 @@ import cafe.adriel.voyager.navigator.tab.Tab
 import cafe.adriel.voyager.navigator.tab.TabOptions
 import jetshop.composeapp.generated.resources.Res
 import jetshop.composeapp.generated.resources.home
+import org.example.jetshop.HideBottomBar
+import org.example.jetshop.bottomNavigation.LocalShowBottomBar
 import org.example.jetshop.screen.home.HomeScreen
 import org.example.jetshop.screen.home.product.ProductDetailsScreen
 import org.jetbrains.compose.resources.painterResource
@@ -28,8 +30,19 @@ object HomeTabs : Tab {
     @Composable
     override fun Content() {
 
+        val updateBottomBar = LocalShowBottomBar.current
+
         Navigator(HomeScreen) { navigator ->
+            val currentScreen = navigator.items.lastOrNull() // ✅ get current screen from stack
+
+            // If the screen implements HideBottomBar, hide it
+            updateBottomBar(currentScreen !is HideBottomBar)
+
             CurrentScreen()
         }
+
+//        Navigator(HomeScreen) { navigator ->
+//            CurrentScreen()
+//        }
     }
 }

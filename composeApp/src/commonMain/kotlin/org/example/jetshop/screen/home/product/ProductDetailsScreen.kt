@@ -90,25 +90,30 @@ import org.example.jetshop.utils.Constants.Companion.Ruppes
 import org.example.jetshop.viewModel.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
 import androidx.compose.animation.core.animateFloatAsState
+import androidx.compose.material3.Scaffold
 import androidx.compose.runtime.collectAsState
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import jetshop.composeapp.generated.resources.right_arrow
+import org.example.jetshop.HideBottomBar
 import org.example.jetshop.repo.home.HomeRepo
 import org.example.jetshop.ui.theme.BlueDark
 
 
-data class ProductDetailsScreen(val productId: String) : Screen {
+data class ProductDetailsScreen(val productId: String) : Screen, HideBottomBar {
     @Composable
     override fun Content() {
         val viewModel: HomeViewModel = rememberScreenModel { HomeViewModel(HomeRepo()) }
 
-        Box(modifier = Modifier.fillMaxSize().background(white)){
-            LaunchedEffect(Unit) {
+
+            Box(modifier = Modifier.fillMaxSize().background(white)){
+                LaunchedEffect(Unit) {
 //        isLoggedIn.value = dataStoreHelper.isUserLoggedIn(context)
-                viewModel.fetchProductDetails( productId)
+                    viewModel.fetchProductDetails( productId)
+                }
+                ProductDetailScreen(productId,viewModel)
             }
-            ProductDetailScreen(productId,viewModel)
-        }
+
+
     }
 }
 

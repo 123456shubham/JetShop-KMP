@@ -75,7 +75,7 @@ fun BrandListing(
 @Composable
 fun CommonCircleItem(
     item: ItemType,
-    onClick: () -> Unit
+    onClick:  () -> Unit
 ) {
 
     val imageUrl: String

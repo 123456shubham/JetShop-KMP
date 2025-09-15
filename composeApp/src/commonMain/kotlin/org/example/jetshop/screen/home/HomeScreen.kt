@@ -26,6 +26,7 @@ import androidx.compose.foundation.layout.padding
 import androidx.compose.foundation.layout.size
 import androidx.compose.foundation.layout.statusBarsPadding
 import androidx.compose.foundation.lazy.LazyColumn
+import androidx.compose.foundation.lazy.rememberLazyListState
 import androidx.compose.foundation.shape.CircleShape
 import androidx.compose.foundation.shape.RoundedCornerShape
 import androidx.compose.material3.ExperimentalMaterial3Api
@@ -47,6 +48,8 @@ import androidx.compose.runtime.remember
 import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.saveable.rememberSaveable
 import androidx.compose.runtime.setValue
+import androidx.compose.runtime.snapshotFlow
+import androidx.compose.runtime.staticCompositionLocalOf
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -63,6 +66,7 @@ import androidx.compose.ui.unit.sp
 import cafe.adriel.voyager.core.model.rememberScreenModel
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.rememberAsyncImagePainter
 import coil3.request.ImageRequest
 import coil3.request.crossfade
@@ -73,6 +77,7 @@ import jetshop.composeapp.generated.resources.premium
 import jetshop.composeapp.generated.resources.search
 import kotlinx.coroutines.delay
 import kotlinx.coroutines.launch
+import org.example.jetshop.bottomNavigation.LocalShowBottomBar
 import org.example.jetshop.components.CenteredCircularProgressIndicator
 import org.example.jetshop.components.Spacer_12dp
 import org.example.jetshop.components.Spacer_8dp
@@ -100,15 +105,39 @@ object HomeScreen : Screen {
     @Composable
     override fun Content() {
 
-        val navigator= LocalNavigator.current
+        val navigator= LocalNavigator.currentOrThrow
         val viewModel: HomeViewModel = rememberScreenModel { HomeViewModel(HomeRepo()) }
 //        val userName by viewModel.userName.collectAsState()
 //        val userIsPrimeActive by viewModel.userIsPrimeActive.collectAsState()
 
+
+
+        // Bottom bar visibility callback
+//        val LocalShowBottomBar = staticCompositionLocalOf<(Boolean) -> Unit> { {} }
+
+        val updateBottomBar = LocalShowBottomBar.current
+
+        // Scroll state for LazyColumn
+        val listState = rememberLazyListState()
+        var lastIndex by remember { mutableStateOf(0) }
+
+        // Detect scroll up/down
+        LaunchedEffect(listState) {
+            snapshotFlow { listState.firstVisibleItemIndex }
+                .collect { index ->
+                    if (index > lastIndex) {
+                        updateBottomBar(false) // scrolling down → hide
+                    } else {
+                        updateBottomBar(true) // scrolling up → show
+                    }
+                    lastIndex = index
+                }
+        }
+
         val userName="Shubham Chauhan"
         Scaffold(
             topBar = {
-                userName?.let {
+                userName.let {
                     MyTopAppBar(
                         it,
 //                        userIsPrimeActive,
@@ -130,7 +159,7 @@ object HomeScreen : Screen {
                 }
             },
         ){ paddingValues ->
-            Box(modifier = Modifier.fillMaxSize().statusBarsPadding().background(white).padding(top = 40.dp)){
+            Box(modifier = Modifier.fillMaxSize().background(white).padding(top = 40.dp)){
 
                 val homeState by viewModel.homeState.collectAsState()
 //            val isLoggedIn by rememberSaveable { mutableStateOf(false) }
@@ -216,7 +245,7 @@ fun MyTopAppBar(
         Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding(top = 40.dp, start = 10.dp, end = 10.dp)
+            .padding( start = 10.dp, end = 10.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

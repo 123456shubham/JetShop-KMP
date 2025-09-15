@@ -43,6 +43,7 @@ import androidx.compose.ui.text.style.TextOverflow
 import androidx.compose.ui.unit.dp
 import cafe.adriel.voyager.core.screen.Screen
 import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.AsyncImage
 import jetshop.composeapp.generated.resources.Res
 import jetshop.composeapp.generated.resources.add_to_cart
@@ -166,7 +167,7 @@ import org.jetbrains.compose.resources.painterResource
 
         val productQuantity=1
 
-        val navigator=LocalNavigator.current
+        val navigator=LocalNavigator.currentOrThrow
         Card(elevation = CardDefaults.cardElevation(6.dp),
             shape = RoundedCornerShape(10.dp),
             colors = CardDefaults.cardColors(containerColor = Color.White),
