@@ -93,6 +93,7 @@ import org.example.jetshop.repo.home.HomeRepo
 import org.example.jetshop.screen.home.banner.AutoSlidingBanner
 import org.example.jetshop.screen.home.brand.BrandListing
 import org.example.jetshop.screen.home.category.CategoriesListing
+import org.example.jetshop.screen.home.product.ProductList
 import org.example.jetshop.screen.home.product.ProductListing
 import org.example.jetshop.ui.theme.DarkBlue
 import org.example.jetshop.ui.theme.appMainTypography
@@ -209,7 +210,7 @@ object HomeScreen : Screen {
                                             style = appMainTypography().seeAllText,
                                             color = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.clickable {
-//                                            navController.navigate(Screen.AllProductList.route)
+                                            navigator.push(ProductList(section?.section_name.toString()))
                                             })
                                     }
                                 }

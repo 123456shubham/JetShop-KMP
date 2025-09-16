@@ -27,10 +27,14 @@ import androidx.compose.ui.layout.ContentScale
 import androidx.compose.ui.text.font.FontWeight
 import androidx.compose.ui.text.style.TextAlign
 import androidx.compose.ui.unit.dp
+import cafe.adriel.voyager.navigator.LocalNavigator
+import cafe.adriel.voyager.navigator.currentOrThrow
 import coil3.compose.rememberAsyncImagePainter
 import org.example.jetshop.components.Spacer_8dp
 import org.example.jetshop.model.home.Brand
 import org.example.jetshop.screen.home.banner.ItemType
+import org.example.jetshop.screen.home.category.CategoryListScreen
+import org.example.jetshop.screen.home.category.CategoryListVoyagerScreen
 import org.example.jetshop.ui.theme.ProductTypography
 import org.example.jetshop.ui.theme.appMainTypography
 
@@ -39,6 +43,7 @@ fun BrandListing(
     brandData: List<Brand>,
 
 ) {
+    val navigator= LocalNavigator.currentOrThrow
     Row(
         modifier = Modifier
             .fillMaxWidth()
@@ -67,6 +72,7 @@ fun BrandListing(
             contentType = { index -> brandData[index].brand_name } // Optional content type
         ) { index ->
             CommonCircleItem(item = ItemType.Brand(brandData[index])) {
+                navigator.push(CategoryListVoyagerScreen(brandData[index].brand_name.toString() ,brandData[index].brand_id.toString(),"Brand"))
 //                navController.navigate(Screen.CategoryBrandDetails.route + "/brand/${brandData[index].brandId}")
             }
         }

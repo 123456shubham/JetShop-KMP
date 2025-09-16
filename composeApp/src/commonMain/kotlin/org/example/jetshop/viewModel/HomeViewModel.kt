@@ -4,13 +4,13 @@ import cafe.adriel.voyager.core.model.ScreenModel
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.flow.MutableStateFlow
-import kotlinx.coroutines.flow.StateFlow
 import kotlinx.coroutines.flow.asStateFlow
 import org.example.jetshop.model.home.HomeResponse
 import org.example.jetshop.remote.ApiResponse
 import kotlinx.coroutines.launch
 import org.example.jetshop.model.category.CategoryDetailsResponse
 import org.example.jetshop.model.productDetails.ProductDetailsResponse
+import org.example.jetshop.model.productDetails.productList.ProductResponse
 import org.example.jetshop.repo.home.HomeRepo
 
 
@@ -68,5 +68,42 @@ class HomeViewModel(private val repo: HomeRepo) : ScreenModel {
 
         }
     }
+
+    private val _brandDetails=MutableStateFlow<ApiResponse<CategoryDetailsResponse>>(ApiResponse.Idle)
+    val brandDetails=_brandDetails.asStateFlow()
+
+    fun fetchBrandDetails(brandId:String){
+        CoroutineScope(Dispatchers.Default).launch {
+            _brandDetails.value=ApiResponse.Loading
+            try {
+                val response=repo.brandDetails(brandId)
+                _brandDetails.value=ApiResponse.Success(response)
+            }catch (e:Exception){
+                _brandDetails.value=ApiResponse.Error(e.message?:"Unknown error")
+            }
+
+        }
+
+    }
+
+
+    private val _productList=MutableStateFlow<ApiResponse<ProductResponse>>(ApiResponse.Idle)
+    val productList=_productList.asStateFlow()
+
+
+    fun productList(){
+        CoroutineScope(Dispatchers.Default).launch {
+            _productList.value=ApiResponse.Loading
+            try {
+                val response=repo.productList()
+                _productList.value=ApiResponse.Success(response)
+            }catch (e:Exception){
+                _productList.value=ApiResponse.Error(e.message?:"Unknown error")
+            }
+
+        }
+    }
+
+
 }
 

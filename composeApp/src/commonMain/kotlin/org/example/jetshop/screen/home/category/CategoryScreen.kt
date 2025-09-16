@@ -113,7 +113,7 @@ fun CategoriesListing(categories: List<Category>?) {
         ) { index ->
             CommonCircleItem(item = ItemType.Category(categories!![index])) {
 //                navigator.push(CategoryBrandScreen(true))
-                navigator.push(CategoryListVoyagerScreen(categories[index].name.toString(),categories[index].id.toString()))
+                navigator.push(CategoryListVoyagerScreen(categories[index].name.toString(),categories[index].id.toString(),"Category"))
             }
         }
     }

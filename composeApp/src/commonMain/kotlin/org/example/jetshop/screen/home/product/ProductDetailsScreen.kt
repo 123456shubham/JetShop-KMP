@@ -660,7 +660,7 @@ fun ProductHeader(
                 model = productData?.product_image_url,
                 contentDescription = productData?.product_name,
                 modifier = Modifier.fillMaxWidth().height(300.dp),
-                contentScale = ContentScale.FillWidth
+                contentScale = ContentScale.Fit
             )
         }
     }
@@ -728,7 +728,7 @@ fun ProductDetails(
             style = ProductTypography().prodPriceBold,
         )
         Text(
-            text = Ruppes + productData?.product_discount_price,
+            text = Ruppes + productData?.product_price,
             style = ProductTypography().prodDiscountPrice,
         )
     }

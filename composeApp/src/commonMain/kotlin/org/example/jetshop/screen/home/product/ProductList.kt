@@ -1,4 +1,4 @@
-package org.example.jetshop.screen.home.category
+package org.example.jetshop.screen.home.product
 
 import androidx.compose.foundation.Image
 import androidx.compose.foundation.background
@@ -9,6 +9,7 @@ import androidx.compose.foundation.layout.Box
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.PaddingValues
 import androidx.compose.foundation.layout.Row
+
 import androidx.compose.foundation.layout.fillMaxSize
 import androidx.compose.foundation.layout.fillMaxWidth
 import androidx.compose.foundation.layout.height
@@ -22,6 +23,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
+//import androidx.paging.compose.collectAsLazyPagingItems
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -30,6 +32,7 @@ import androidx.compose.runtime.collectAsState
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateOf
 import androidx.compose.runtime.remember
+import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Alignment.Companion.CenterVertically
 import androidx.compose.ui.Modifier
@@ -51,175 +54,160 @@ import jetshop.composeapp.generated.resources.plus
 import org.example.jetshop.HideBottomBar
 import org.example.jetshop.components.CenteredCircularProgressIndicator
 import org.example.jetshop.components.LoginPromptDialog
+import org.example.jetshop.components.Montserrat
 import org.example.jetshop.components.Spacer_4dp
 import org.example.jetshop.components.Spacer_8dp
 import org.example.jetshop.components.ToolbarWithBackButtonAndTitle
-import org.example.jetshop.model.category.CategoryDetailsResponse
-import org.example.jetshop.model.category.Product
+import org.example.jetshop.model.productDetails.productList.ProductResponse
 import org.example.jetshop.remote.ApiResponse
 import org.example.jetshop.repo.home.HomeRepo
-import org.example.jetshop.screen.home.product.ProductDetailsScreen
-import org.example.jetshop.screen.login.Login
 import org.example.jetshop.ui.theme.ProductTypography
 import org.example.jetshop.ui.theme.white
 import org.example.jetshop.viewModel.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
 
-data class CategoryListVoyagerScreen(val categoryName: String,val categoryId: String,val type: String) : Screen, HideBottomBar {
+
+data class ProductList(val productsTitle: String) : Screen, HideBottomBar{
     @Composable
     override fun Content() {
         val viewModel: HomeViewModel = rememberScreenModel { HomeViewModel(HomeRepo()) }
-        CategoryListScreen(categoryName = categoryName,  categoryId,viewModel = viewModel,type)
+
+        Box(modifier = Modifier.fillMaxSize().background(white)){
+            ProductListScreen(productsTitle,viewModel)
+
+        }
     }
 }
 
 @Composable
-fun CategoryListScreen(categoryName: String,categoryId: String, viewModel: HomeViewModel,type: String) {
+fun ProductListScreen(
 
-    LaunchedEffect(Unit) {
-        if (type == "Brand"){
-            viewModel.fetchBrandDetails(categoryId)
-        }else if (type == "Category"){
-            viewModel.fetchCategoryDetails(categoryId)
-        }
-
-
-    }
-
-    val categoryState by viewModel.categoryDetails.collectAsState()
-    val brandState by viewModel.brandDetails.collectAsState()
-
-
-    val navigator = LocalNavigator.currentOrThrow
+    productsTitle: String,
+//    navController: NavController,
+    viewModel: HomeViewModel ,
+//    wishlistViewModel: WishlistViewModel = hiltViewModel(),
+) {
+//    val context = LocalContext.current
+//    val dataStoreHelper = remember { UserDataStore(context) }
+    val isLoggedIn = remember { mutableStateOf(false) }
     val showLoginDialog = remember { mutableStateOf(false) }
 
-    if (type=="Brand"){
-        Box(modifier = Modifier.fillMaxSize().background(white)) {
-            Scaffold(
-                topBar = {
-                    ToolbarWithBackButtonAndTitle(
-                        title = categoryName,
-                        onBackClick = { navigator.pop() }
-                    )
-                }
-            ) { paddingValues ->
-
-                LoginPromptDialog(
-                    showDialog = showLoginDialog.value,
-                    onDismiss = { showLoginDialog.value = false },
-                    onLoginClick = {
-                        showLoginDialog.value = false
-                        navigator.push(Login)
-                    }
-                )
-
-                when (brandState) {
-                    is ApiResponse.Idle -> {}
-                    is ApiResponse.Loading -> CenteredCircularProgressIndicator()
-                    is ApiResponse.Success -> {
-                        val products = (brandState as ApiResponse.Success<CategoryDetailsResponse>).data.products
-
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            contentPadding = PaddingValues(5.dp),
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                            verticalArrangement = Arrangement.spacedBy(5.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(white)
-                                .padding(paddingValues)
-                        ) {
-                            items(products?.size!!) { index ->
-                                val product = products[index]
-                                ProductCardPage(
-                                    product = product,
-                                    onClick = {
-                                        navigator.push(ProductDetailsScreen(product?.product_id.toString()))
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    is ApiResponse.Error -> {
-                        Text(
-                            text = "Error: ${(categoryState as ApiResponse.Error).message}",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        print("Error...${(categoryState as ApiResponse.Error).message}")
-                    }
-                }
-            }
-        }
-
-    }else if (type=="Category"){
-        Box(modifier = Modifier.fillMaxSize().background(white)) {
-            Scaffold(
-                topBar = {
-                    ToolbarWithBackButtonAndTitle(
-                        title = categoryName,
-                        onBackClick = { navigator.pop() }
-                    )
-                }
-            ) { paddingValues ->
-
-                LoginPromptDialog(
-                    showDialog = showLoginDialog.value,
-                    onDismiss = { showLoginDialog.value = false },
-                    onLoginClick = {
-                        showLoginDialog.value = false
-                        navigator.push(Login)
-                    }
-                )
-
-                when (categoryState) {
-                    is ApiResponse.Idle -> {}
-                    is ApiResponse.Loading -> CenteredCircularProgressIndicator()
-                    is ApiResponse.Success -> {
-                        val products = (categoryState as ApiResponse.Success<CategoryDetailsResponse>).data.products
-
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            contentPadding = PaddingValues(5.dp),
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                            verticalArrangement = Arrangement.spacedBy(5.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(white)
-                                .padding(paddingValues)
-                        ) {
-                            items(products?.size!!) { index ->
-                                val product = products[index]
-                                ProductCardPage(
-                                    product = product,
-                                    onClick = {
-                                        navigator.push(ProductDetailsScreen(product?.product_id.toString()))
-                                    }
-                                )
-                            }
-                        }
-                    }
-                    is ApiResponse.Error -> {
-                        Text(
-                            text = "Error: ${(categoryState as ApiResponse.Error).message}",
-                            color = Color.Red,
-                            modifier = Modifier.padding(16.dp)
-                        )
-                        print("Error...${(categoryState as ApiResponse.Error).message}")
-                    }
-                }
-            }
-        }
-
+    val navigator=LocalNavigator.currentOrThrow
+    LaunchedEffect(Unit) {
+        viewModel.productList()
+//        isLoggedIn.value = dataStoreHelper.isUserLoggedIn(context)
     }
+
+    LoginPromptDialog(
+        showDialog = showLoginDialog.value,
+        onDismiss = { showLoginDialog.value = false },
+        onLoginClick = {
+            showLoginDialog.value = false
+//            navController.navigate(Screen.Login.route)
+        }
+    )
+    val productState by  viewModel.productList.collectAsState()
+
+    Scaffold(topBar = {
+        ToolbarWithBackButtonAndTitle(title = "${productsTitle}", onBackClick = {
+            navigator.pop()
+        })
+    }) { paddingValues ->
+        Box(modifier = Modifier.fillMaxSize().background(white)) { // Fix: Remove padding here
+
+            when (productState) {
+                is ApiResponse.Idle -> {}
+                is ApiResponse.Loading -> {
+                    CenteredCircularProgressIndicator()
+                }
+                is ApiResponse.Success -> {
+                    // TODO
+                    val productData = (productState as ApiResponse.Success<ProductResponse>).data
+
+
+                    LazyVerticalGrid(
+                        columns = GridCells.Fixed(2),
+                        contentPadding = PaddingValues(8.dp),
+                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+                        verticalArrangement = Arrangement.spacedBy(8.dp),
+                        modifier = Modifier
+                            .fillMaxSize()
+                            .padding(paddingValues) // Fix: Apply padding only here
+                    ) {
+                        items(productData.products?.size ?: 0) { index ->
+//
+                            val product = productData.products?.get(index)
+
+                            var isInWishlist by remember { mutableStateOf(false) }
+
+//                            LaunchedEffect(product) {
+//                                wishlistViewModel.isProductInWishlist(product.productId) {
+//                                    isInWishlist = it
+//                                }
+//                            }
+//                            val wishlistProduct = product.toWishlistProduct()
+
+                            ProductCardPage(
+//                                viewModel = viewModel,
+                                product = product,
+                                onClick = {navigator.push(ProductDetailsScreen(product?.product_id.toString()))}
+//                                onAddToCart = { productId ->
+//                                    if (isLoggedIn.value) {
+//                                        viewModel.addToCart(productId, "1")
+//                                    } else {
+//                                        showLoginDialog.value = true
+//                                    }
+//                                },
+//                                onViewProduct = { selectedProduct ->
+//                                    navController.navigate("${Screen.ProductDetails.route}/${selectedProduct.productId}")
+//                                },
+//                                onWishlistToggle = {
+//                                    if (isInWishlist) {
+//                                        wishlistViewModel.removeFromWishlist(wishlistProduct)
+//                                    } else {
+//                                        wishlistViewModel.addToWishlist(wishlistProduct)
+//                                    }
+//                                    isInWishlist = !isInWishlist
+//                                },
+//                                isInWishlist = isInWishlist,
+//                                onRemoveFromCart = { productId ->
+//                                    viewModel.removeFromCart(productId)
+//                                }
+                            )
+
+                        }
+                    }
+                }
+                is ApiResponse.Error -> {
+
+                    val error = (productState as ApiResponse.Error).message
+                    Box(
+                        modifier = Modifier.fillMaxSize(),
+                        contentAlignment = Alignment.Center
+                    ) {
+                        Column(
+                            horizontalAlignment = Alignment.CenterHorizontally
+                        ) {
+                            Text(text = "Error: ${error}", color = Color.Red, fontFamily = Montserrat)
+                            Spacer_8dp()
+                            Button(onClick = { viewModel.productList() }) {
+                                Text("Retry",fontFamily = Montserrat)
+                            }
+                        }
+                    }
+                }
+
+                }
+            }
+        }
+
+
 }
-
-
 
 
 @Composable
 fun ProductCardPage(
-    product: Product?,
+    product: org.example.jetshop.model.productDetails.productList.Product?,
     onClick: () -> Unit,
 ) {
     Card(
@@ -343,44 +331,3 @@ fun ProductCardPage(
         }
     }
 }
-//@Composable
-//fun ProductCardPage(product: Product?, onClick: () -> Unit) {
-//    Card(
-//        modifier = Modifier
-//            .fillMaxWidth()
-//            .padding(8.dp)
-//            .clickable { onClick() }
-//    ) {
-//       Column(
-//            modifier = Modifier.padding(8.dp)
-//        ) {
-//            AsyncImage(
-//                model = product?.product_image_url,
-//                contentDescription = product?.product_name,
-//                modifier = Modifier
-//                    .size(80.dp)
-//                    .clip(RoundedCornerShape(8.dp))
-//            )
-//
-//            Spacer_8dp()
-//
-//            Row(modifier = Modifier) {
-//                Text(
-//                    text = product?.product_name.toString(),
-//                    fontWeight = FontWeight.Bold,
-//                    fontSize = 16.sp
-//                )
-//                Text(
-//                    text = "₹${product?.product_discount_price}",
-//                    color = Color.Red,
-//                    fontSize = 14.sp
-//                )
-//                Text(
-//                    text = "Stock: ${product?.product_stock_quantity}",
-//                    fontSize = 12.sp,
-//                    color = Color.Gray
-//                )
-//            }
-//        }
-//    }
-//}
