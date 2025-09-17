@@ -131,7 +131,7 @@ import org.jetbrains.compose.resources.painterResource
 
         LazyRow(
             horizontalArrangement = Arrangement.spacedBy(0.dp),
-            contentPadding = PaddingValues(horizontal = 0.dp)
+            contentPadding = PaddingValues(horizontal = 0.dp),
         ) {
             items(productData.size) { product ->
                 var isInWishlist by remember { mutableStateOf(false) }

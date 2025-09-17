@@ -33,6 +33,7 @@ import coil3.compose.rememberAsyncImagePainter
 import org.example.jetshop.components.Spacer_8dp
 import org.example.jetshop.model.home.Brand
 import org.example.jetshop.screen.home.banner.ItemType
+import org.example.jetshop.screen.home.category.CategoryBrandScreen
 import org.example.jetshop.screen.home.category.CategoryListScreen
 import org.example.jetshop.screen.home.category.CategoryListVoyagerScreen
 import org.example.jetshop.ui.theme.ProductTypography
@@ -59,7 +60,7 @@ fun BrandListing(
             style = appMainTypography().seeAllText,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.clickable {
-//                navigateToBrand()
+                navigator.push(CategoryBrandScreen(false,brandData))
             })
     }
     Spacer_8dp()

@@ -58,6 +58,7 @@ import org.example.jetshop.components.Montserrat
 import org.example.jetshop.components.Spacer_4dp
 import org.example.jetshop.components.Spacer_8dp
 import org.example.jetshop.components.ToolbarWithBackButtonAndTitle
+import org.example.jetshop.model.home.Product
 import org.example.jetshop.model.productDetails.productList.ProductResponse
 import org.example.jetshop.remote.ApiResponse
 import org.example.jetshop.repo.home.HomeRepo
@@ -67,13 +68,15 @@ import org.example.jetshop.viewModel.HomeViewModel
 import org.jetbrains.compose.resources.painterResource
 
 
-data class ProductList(val productsTitle: String) : Screen, HideBottomBar{
+data class ProductList(val productsTitle: String,
+                       val products: List<Product>
+) : Screen, HideBottomBar{
     @Composable
     override fun Content() {
         val viewModel: HomeViewModel = rememberScreenModel { HomeViewModel(HomeRepo()) }
 
         Box(modifier = Modifier.fillMaxSize().background(white)){
-            ProductListScreen(productsTitle,viewModel)
+            ProductListScreen(productsTitle,viewModel,products)
 
         }
     }
@@ -83,8 +86,10 @@ data class ProductList(val productsTitle: String) : Screen, HideBottomBar{
 fun ProductListScreen(
 
     productsTitle: String,
-//    navController: NavController,
     viewModel: HomeViewModel ,
+    products: List<Product>
+
+
 //    wishlistViewModel: WishlistViewModel = hiltViewModel(),
 ) {
 //    val context = LocalContext.current
@@ -94,7 +99,7 @@ fun ProductListScreen(
 
     val navigator=LocalNavigator.currentOrThrow
     LaunchedEffect(Unit) {
-        viewModel.productList()
+//        viewModel.productList()
 //        isLoggedIn.value = dataStoreHelper.isUserLoggedIn(context)
     }
 
@@ -106,39 +111,31 @@ fun ProductListScreen(
 //            navController.navigate(Screen.Login.route)
         }
     )
-    val productState by  viewModel.productList.collectAsState()
+//    val productState by  viewModel.productList.collectAsState()
 
     Scaffold(topBar = {
-        ToolbarWithBackButtonAndTitle(title = "${productsTitle}", onBackClick = {
+        ToolbarWithBackButtonAndTitle(title = "${productsTitle}",
+            onBackClick = {
             navigator.pop()
         })
     }) { paddingValues ->
         Box(modifier = Modifier.fillMaxSize().background(white)) { // Fix: Remove padding here
 
-            when (productState) {
-                is ApiResponse.Idle -> {}
-                is ApiResponse.Loading -> {
-                    CenteredCircularProgressIndicator()
-                }
-                is ApiResponse.Success -> {
-                    // TODO
-                    val productData = (productState as ApiResponse.Success<ProductResponse>).data
 
-
-                    LazyVerticalGrid(
-                        columns = GridCells.Fixed(2),
-                        contentPadding = PaddingValues(8.dp),
-                        horizontalArrangement = Arrangement.spacedBy(8.dp),
-                        verticalArrangement = Arrangement.spacedBy(8.dp),
-                        modifier = Modifier
-                            .fillMaxSize()
-                            .padding(paddingValues) // Fix: Apply padding only here
-                    ) {
-                        items(productData.products?.size ?: 0) { index ->
+            LazyVerticalGrid(
+                columns = GridCells.Fixed(2),
+                contentPadding = PaddingValues(8.dp),
+                horizontalArrangement = Arrangement.spacedBy(8.dp),
+                verticalArrangement = Arrangement.spacedBy(8.dp),
+                modifier = Modifier
+                    .fillMaxSize()
+                    .padding(paddingValues) // Fix: Apply padding only here
+            ) {
+                items(products.size) { index ->
 //
-                            val product = productData.products?.get(index)
+                    val product = products?.get(index)
 
-                            var isInWishlist by remember { mutableStateOf(false) }
+                    var isInWishlist by remember { mutableStateOf(false) }
 
 //                            LaunchedEffect(product) {
 //                                wishlistViewModel.isProductInWishlist(product.productId) {
@@ -147,10 +144,10 @@ fun ProductListScreen(
 //                            }
 //                            val wishlistProduct = product.toWishlistProduct()
 
-                            ProductCardPage(
+                    ProductCardPage(
 //                                viewModel = viewModel,
-                                product = product,
-                                onClick = {navigator.push(ProductDetailsScreen(product?.product_id.toString()))}
+                        product = product,
+                        onClick = {navigator.push(ProductDetailsScreen(product?.product_id.toString()))}
 //                                onAddToCart = { productId ->
 //                                    if (isLoggedIn.value) {
 //                                        viewModel.addToCart(productId, "1")
@@ -173,31 +170,93 @@ fun ProductListScreen(
 //                                onRemoveFromCart = { productId ->
 //                                    viewModel.removeFromCart(productId)
 //                                }
-                            )
-
-                        }
-                    }
-                }
-                is ApiResponse.Error -> {
-
-                    val error = (productState as ApiResponse.Error).message
-                    Box(
-                        modifier = Modifier.fillMaxSize(),
-                        contentAlignment = Alignment.Center
-                    ) {
-                        Column(
-                            horizontalAlignment = Alignment.CenterHorizontally
-                        ) {
-                            Text(text = "Error: ${error}", color = Color.Red, fontFamily = Montserrat)
-                            Spacer_8dp()
-                            Button(onClick = { viewModel.productList() }) {
-                                Text("Retry",fontFamily = Montserrat)
-                            }
-                        }
-                    }
-                }
+                    )
 
                 }
+            }
+//            when (productState) {
+//                is ApiResponse.Idle -> {}
+//                is ApiResponse.Loading -> {
+//                    CenteredCircularProgressIndicator()
+//                }
+//                is ApiResponse.Success -> {
+//                    // TODO
+//                    val productData = (productState as ApiResponse.Success<ProductResponse>).data
+//
+//
+//                    LazyVerticalGrid(
+//                        columns = GridCells.Fixed(2),
+//                        contentPadding = PaddingValues(8.dp),
+//                        horizontalArrangement = Arrangement.spacedBy(8.dp),
+//                        verticalArrangement = Arrangement.spacedBy(8.dp),
+//                        modifier = Modifier
+//                            .fillMaxSize()
+//                            .padding(paddingValues) // Fix: Apply padding only here
+//                    ) {
+//                        items(productData.products?.size ?: 0) { index ->
+////
+//                            val product = productData.products?.get(index)
+//
+//                            var isInWishlist by remember { mutableStateOf(false) }
+//
+////                            LaunchedEffect(product) {
+////                                wishlistViewModel.isProductInWishlist(product.productId) {
+////                                    isInWishlist = it
+////                                }
+////                            }
+////                            val wishlistProduct = product.toWishlistProduct()
+//
+//                            ProductCardPage(
+////                                viewModel = viewModel,
+//                                product = product,
+//                                onClick = {navigator.push(ProductDetailsScreen(product?.product_id.toString()))}
+////                                onAddToCart = { productId ->
+////                                    if (isLoggedIn.value) {
+////                                        viewModel.addToCart(productId, "1")
+////                                    } else {
+////                                        showLoginDialog.value = true
+////                                    }
+////                                },
+////                                onViewProduct = { selectedProduct ->
+////                                    navController.navigate("${Screen.ProductDetails.route}/${selectedProduct.productId}")
+////                                },
+////                                onWishlistToggle = {
+////                                    if (isInWishlist) {
+////                                        wishlistViewModel.removeFromWishlist(wishlistProduct)
+////                                    } else {
+////                                        wishlistViewModel.addToWishlist(wishlistProduct)
+////                                    }
+////                                    isInWishlist = !isInWishlist
+////                                },
+////                                isInWishlist = isInWishlist,
+////                                onRemoveFromCart = { productId ->
+////                                    viewModel.removeFromCart(productId)
+////                                }
+//                            )
+//
+//                        }
+//                    }
+//                }
+//                is ApiResponse.Error -> {
+//
+//                    val error = (productState as ApiResponse.Error).message
+//                    Box(
+//                        modifier = Modifier.fillMaxSize(),
+//                        contentAlignment = Alignment.Center
+//                    ) {
+//                        Column(
+//                            horizontalAlignment = Alignment.CenterHorizontally
+//                        ) {
+//                            Text(text = "Error: ${error}", color = Color.Red, fontFamily = Montserrat)
+//                            Spacer_8dp()
+//                            Button(onClick = { viewModel.productList() }) {
+//                                Text("Retry",fontFamily = Montserrat)
+//                            }
+//                        }
+//                    }
+//                }
+//
+//                }
             }
         }
 
@@ -207,7 +266,7 @@ fun ProductListScreen(
 
 @Composable
 fun ProductCardPage(
-    product: org.example.jetshop.model.productDetails.productList.Product?,
+    product: Product?,
     onClick: () -> Unit,
 ) {
     Card(

@@ -210,7 +210,11 @@ object HomeScreen : Screen {
                                             style = appMainTypography().seeAllText,
                                             color = MaterialTheme.colorScheme.primary,
                                             modifier = Modifier.clickable {
-                                            navigator.push(ProductList(section?.section_name.toString()))
+                                                // i want send data according to section name
+
+                                            navigator.push(ProductList(section?.section_name.toString(),
+                                                section?.products as List<Product>
+                                            ))
                                             })
                                     }
                                 }
@@ -246,7 +250,7 @@ fun MyTopAppBar(
         Modifier
             .fillMaxWidth()
             .background(Color.White)
-            .padding( start = 10.dp, end = 10.dp)
+            .padding( start = 10.dp, end = 10.dp, top = 30.dp)
     ) {
         Row(
             modifier = Modifier.fillMaxWidth(),

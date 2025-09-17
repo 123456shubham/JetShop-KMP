@@ -95,7 +95,7 @@ fun CategoriesListing(categories: List<Category>?) {
             style = appMainTypography().seeAllText,
             color = MaterialTheme.colorScheme.primary,
             modifier = Modifier.clickable {
-                // TODO: Implement "See all" navigation
+                navigator.push(CategoryBrandScreen(true,categories))
             }
         )
     }

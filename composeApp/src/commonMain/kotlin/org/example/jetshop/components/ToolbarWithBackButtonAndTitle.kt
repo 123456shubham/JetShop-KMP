@@ -38,6 +38,7 @@ fun ToolbarWithBackButtonAndTitle(
     Row(
         modifier = Modifier
             .fillMaxWidth()
+            .padding(top = 20.dp)
             .height(56.dp) // standard toolbar height
             .background(White),
         verticalAlignment = Alignment.CenterVertically

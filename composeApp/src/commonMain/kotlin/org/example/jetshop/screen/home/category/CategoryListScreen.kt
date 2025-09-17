@@ -22,6 +22,7 @@ import androidx.compose.material3.ButtonDefaults
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
 import androidx.compose.material3.IconButton
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.Text
 import androidx.compose.runtime.Composable
@@ -178,24 +179,41 @@ fun CategoryListScreen(categoryName: String,categoryId: String, viewModel: HomeV
                     is ApiResponse.Success -> {
                         val products = (categoryState as ApiResponse.Success<CategoryDetailsResponse>).data.products
 
-                        LazyVerticalGrid(
-                            columns = GridCells.Fixed(2),
-                            contentPadding = PaddingValues(5.dp),
-                            horizontalArrangement = Arrangement.spacedBy(5.dp),
-                            verticalArrangement = Arrangement.spacedBy(5.dp),
-                            modifier = Modifier
-                                .fillMaxSize()
-                                .background(white)
-                                .padding(paddingValues)
-                        ) {
-                            items(products?.size!!) { index ->
-                                val product = products[index]
-                                ProductCardPage(
-                                    product = product,
-                                    onClick = {
-                                        navigator.push(ProductDetailsScreen(product?.product_id.toString()))
-                                    }
+                        if (products.isNullOrEmpty()) {
+                            // Show empty state
+                            Box(
+                                modifier = Modifier.fillMaxSize().background(white),
+                                contentAlignment = Alignment.Center
+                            ) {
+                                Text(
+                                    text = "No products found for this category",
+                                    color = Color.Gray,
+                                    fontSize = 18.sp,
+                                    style = MaterialTheme.typography.bodyMedium
                                 )
+                            }
+                        } else {
+
+
+                            LazyVerticalGrid(
+                                columns = GridCells.Fixed(2),
+                                contentPadding = PaddingValues(5.dp),
+                                horizontalArrangement = Arrangement.spacedBy(5.dp),
+                                verticalArrangement = Arrangement.spacedBy(5.dp),
+                                modifier = Modifier
+                                    .fillMaxSize()
+                                    .background(white)
+                                    .padding(paddingValues)
+                            ) {
+                                items(products?.size!!) { index ->
+                                    val product = products[index]
+                                    ProductCardPage(
+                                        product = product,
+                                        onClick = {
+                                            navigator.push(ProductDetailsScreen(product?.product_id.toString()))
+                                        }
+                                    )
+                                }
                             }
                         }
                     }

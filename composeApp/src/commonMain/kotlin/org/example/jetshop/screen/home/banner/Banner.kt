@@ -69,7 +69,7 @@ fun AutoSlidingBanner(sliderImageData: List<SliderImage>?) {
     }
 
     Column(
-        modifier = Modifier.fillMaxWidth(), horizontalAlignment = Alignment.CenterHorizontally
+        modifier = Modifier.fillMaxWidth().padding(top = 30.dp), horizontalAlignment = Alignment.CenterHorizontally
     ) {
         Spacer_8dp() // Space between pager & dots
         HorizontalPager(state = pagerState) { page ->
